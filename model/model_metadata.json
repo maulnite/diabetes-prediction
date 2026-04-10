@@ -1,0 +1,36 @@
+{
+  "model_name": "Stacking Ensemble",
+  "base_learners": [
+    "XGBoost",
+    "LightGBM",
+    "RandomForest",
+    "ExtraTrees",
+    "GradBoosting"
+  ],
+  "meta_learner": "LogisticRegression (C=0.1, balanced)",
+  "smote": true,
+  "calibration": "isotonic (CalibratedClassifierCV)",
+  "threshold": 0.5988095238095237,
+  "min_recall_constraint": 0.6,
+  "threshold_method": "maximize Precision | Recall >= 0.60 | OOF CV",
+  "selected_features": [
+    1,
+    4,
+    5
+  ],
+  "zero_cols": [
+    "Glucose",
+    "BloodPressure",
+    "SkinThickness",
+    "Insulin",
+    "BMI"
+  ],
+  "test_roc_auc": 0.7826,
+  "test_avg_precision": 0.6187,
+  "test_precision": 0.56,
+  "test_recall": 0.5185,
+  "test_fp": 22,
+  "test_fn": 26,
+  "test_fpr": 0.22,
+  "test_fdr": 0.44
+}
