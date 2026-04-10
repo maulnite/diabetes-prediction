@@ -1,5 +1,5 @@
 {
-  "model_name": "Stacking Ensemble",
+  "model_name": "Extra Trees",
   "base_learners": [
     "XGBoost",
     "LightGBM",
@@ -10,13 +10,24 @@
   "meta_learner": "LogisticRegression (C=0.1, balanced)",
   "smote": true,
   "calibration": "isotonic (CalibratedClassifierCV)",
-  "threshold": 0.5988095238095237,
+  "threshold": 0.6638348071598914,
   "min_recall_constraint": 0.6,
   "threshold_method": "maximize Precision | Recall >= 0.60 | OOF CV",
   "selected_features": [
-    1,
-    4,
-    5
+    "Pregnancies",
+    "Glucose",
+    "BloodPressure",
+    "SkinThickness",
+    "Insulin",
+    "BMI",
+    "DiabetesPedigreeFunction",
+    "Age",
+    "Glucose_BMI",
+    "Glucose_Age",
+    "Insulin_Glucose",
+    "BMI_squared",
+    "BMI_cat",
+    "Age_group"
   ],
   "zero_cols": [
     "Glucose",
@@ -25,12 +36,12 @@
     "Insulin",
     "BMI"
   ],
-  "test_roc_auc": 0.7826,
-  "test_avg_precision": 0.6187,
-  "test_precision": 0.56,
-  "test_recall": 0.5185,
-  "test_fp": 22,
-  "test_fn": 26,
-  "test_fpr": 0.22,
-  "test_fdr": 0.44
+  "test_roc_auc": 0.8291,
+  "test_avg_precision": 0.6745,
+  "test_precision": 0.6531,
+  "test_recall": 0.5926,
+  "test_fp": 17,
+  "test_fn": 22,
+  "test_fpr": 0.17,
+  "test_fdr": 0.3469
 }
