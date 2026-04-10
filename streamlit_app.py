@@ -30,7 +30,7 @@ LABEL_CANDIDATES = ["Outcome", "Label", "target", "Target", "y_true", "actual", 
 
 @st.cache_resource
 def load_bundle():
-    candidates = [Path("./model/diabetes_model_bundle.pkl")]
+    candidates = [Path("./model/diabetes_model_bundle_revised.pkl")]
     for path in candidates:
         if path.exists():
             obj = joblib.load(path)
