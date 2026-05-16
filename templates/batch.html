@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Batch Prediction · Diabetes Clinical AI{% endblock %}
+{% block content %}
+<div class="page-title mb-4">
+  <span class="badge rounded-pill text-bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 mb-2">Batch Prediction</span>
+  <h1 class="fw-bold mb-2">Upload CSV Dataset</h1>
+  <p class="text-muted mb-0">Prediksi banyak data sekaligus dengan batch analytics dan data quality report.</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-7">
+    <div class="card app-card h-100">
+      <div class="card-body p-4 p-md-5">
+        <div class="upload-zone mb-4">
+          <i class="bi bi-cloud-arrow-up text-primary"></i>
+          <h5 class="fw-bold mt-3">Upload CSV File</h5>
+          <p class="text-muted mb-0">Gunakan file CSV dengan 8 kolom utama. Kolom tambahan boleh ada dan akan diabaikan.</p>
+        </div>
+        <form method="post" action="{{ url_for('batch') }}" enctype="multipart/form-data" class="app-form">
+          <label for="csv_file" class="form-label fw-semibold">Pilih file CSV</label>
+          <input class="form-control form-control-lg rounded-3" type="file" id="csv_file" name="csv_file" accept=".csv" required>
+          <div class="form-text">Maksimal 8 MB. Missing value akan diimputasi, outlier numerik akan di-clip.</div>
+          <div class="d-flex flex-column flex-sm-row gap-2 mt-4">
+            <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4 submit-btn">
+              <span class="btn-normal"><i class="bi bi-cloud-arrow-up me-2"></i>Upload & Prediksi</span>
+              <span class="btn-loading d-none"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Memproses CSV...</span>
+            </button>
+            <a href="{{ url_for('download_csv_template') }}" class="btn btn-outline-primary btn-lg rounded-pill px-4"><i class="bi bi-filetype-csv me-2"></i>Download Template</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-5">
+    <div class="card app-card mb-4">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-list-check text-primary me-2"></i>Kolom CSV yang Wajib Ada</h5>
+        <div class="d-flex flex-wrap gap-2">
+          {% for col in required_columns %}<span class="badge rounded-pill text-bg-light border px-3 py-2">{{ col }}</span>{% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="card app-card">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-database-check text-primary me-2"></i>Batch Dataset Notes</h5>
+        <p class="text-muted mb-3">Untuk hasil terbaik, gunakan CSV dengan format kolom Pima: Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, dan Age.</p>
+        <div class="d-flex flex-wrap gap-2">
+          <a href="{{ url_for('dataset_source') }}" class="btn btn-outline-primary rounded-pill"><i class="bi bi-arrow-right me-2"></i>Lihat Dataset Source</a>
+          <a href="{{ url_for('download_csv_template') }}" class="btn btn-light border rounded-pill"><i class="bi bi-download me-2"></i>Template CSV</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

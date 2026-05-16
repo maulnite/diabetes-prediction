@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Diabetes Clinical AI{% endblock %}
+{% block content %}
+<section class="dashboard-hero dashboard-hero-clean mb-4">
+  <div class="row align-items-center g-4">
+    <div class="col-xl-7">
+      <span class="eyebrow-pill mb-3"><i class="bi bi-stars me-1"></i>Clinical AI Dashboard</span>
+      <h1 class="display-6 fw-bold mb-3">Prediksi Risiko Diabetes dengan Machine Learning</h1>
+      <p class="lead text-muted mb-4">Dashboard Flask + Bootstrap untuk prediksi manual, batch CSV, data quality report, API endpoint, dan report hasil prediksi.</p>
+      <div class="d-flex flex-column flex-sm-row gap-3">
+        <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg rounded-pill px-4"><i class="bi bi-clipboard2-pulse me-2"></i>Manual Prediction</a>
+        <a href="{{ url_for('batch') }}" class="btn btn-outline-primary btn-lg rounded-pill px-4"><i class="bi bi-filetype-csv me-2"></i>Upload CSV</a>
+        <a href="{{ url_for('prediction_guide') }}" class="btn btn-light border btn-lg rounded-pill px-4"><i class="bi bi-compass me-2"></i>Guide</a>
+      </div>
+    </div>
+    <div class="col-xl-5">
+      <div class="glass-card glass-card-clean p-4">
+        <div class="d-flex align-items-center gap-3 mb-4">
+          <div class="icon-circle bg-primary-subtle text-primary"><i class="bi bi-cpu-fill"></i></div>
+          <div>
+            <h5 class="fw-bold mb-0">{{ model_name }}</h5>
+            <p class="text-muted small mb-0">Ringkasan performa model</p>
+          </div>
+        </div>
+        <div class="row g-3">
+          <div class="col-4"><div class="metric-card metric-card-clean"><span>Accuracy</span><strong class="count-up" data-count="{{ '%.2f'|format((metrics.get('accuracy') or 0) * 100) }}" data-suffix="%">0%</strong></div></div>
+          <div class="col-4"><div class="metric-card metric-card-clean"><span>ROC-AUC</span><strong class="count-up" data-count="{{ '%.2f'|format((metrics.get('roc_auc') or 0) * 100) }}" data-suffix="%">0%</strong></div></div>
+          <div class="col-4"><div class="metric-card metric-card-clean"><span>F1</span><strong class="count-up" data-count="{{ '%.2f'|format((metrics.get('f1') or 0) * 100) }}" data-suffix="%">0%</strong></div></div>
+        </div>
+        <div class="soft-note mt-4"><i class="bi bi-info-circle me-2"></i>Hasil prediksi bersifat pembelajaran, bukan diagnosis medis resmi.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="mb-4">
+  <div class="row g-3">
+    <div class="col-sm-6 col-xl-3"><div class="stat-card stat-card-clean"><span>Total History</span><strong class="count-up" data-count="{{ dashboard_stats.total }}" data-decimals="0">0</strong></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="stat-card stat-card-clean danger"><span>High Risk</span><strong class="count-up" data-count="{{ dashboard_stats.high }}" data-decimals="0">0</strong></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="stat-card stat-card-clean warning"><span>Medium Risk</span><strong class="count-up" data-count="{{ dashboard_stats.medium }}" data-decimals="0">0</strong></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="stat-card stat-card-clean success"><span>Low Risk</span><strong class="count-up" data-count="{{ dashboard_stats.low }}" data-decimals="0">0</strong></div></div>
+  </div>
+</section>
+
+<section class="mb-4">
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card app-card h-100">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+            <div>
+              <h5 class="fw-bold mb-1">Quick Actions</h5>
+              <p class="text-muted small mb-0">Akses fitur utama yang paling sering dipakai.</p>
+            </div>
+            <span class="badge clean-badge">Docker Ready</span>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <a class="feature-tile feature-tile-clean" href="{{ url_for('predict') }}">
+                <i class="bi bi-ui-checks-grid"></i>
+                <div><strong>Manual Prediction</strong><small>Input data pasien dan export report.</small></div>
+              </a>
+            </div>
+            <div class="col-md-6">
+              <a class="feature-tile feature-tile-clean" href="{{ url_for('batch') }}">
+                <i class="bi bi-file-earmark-spreadsheet"></i>
+                <div><strong>Batch Analytics</strong><small>Upload CSV, chart, dan quality report.</small></div>
+              </a>
+            </div>
+          </div>
+          <hr class="my-4">
+          <div class="row g-3 small">
+            <div class="col-md-6"><a class="quick-link" href="{{ url_for('dataset_source') }}"><i class="bi bi-database me-2"></i>Dataset Source</a></div>
+            <div class="col-md-6"><a class="quick-link" href="{{ url_for('model_performance') }}"><i class="bi bi-bar-chart-line me-2"></i>Model Performance</a></div>
+            <div class="col-md-6"><a class="quick-link" href="{{ url_for('api_docs') }}"><i class="bi bi-code-slash me-2"></i>API Documentation</a></div>
+            <div class="col-md-6"><a class="quick-link" href="{{ url_for('methodology') }}"><i class="bi bi-diagram-3 me-2"></i>Methodology</a></div>
+            <div class="col-md-6"><a class="quick-link" href="{{ url_for('history') }}"><i class="bi bi-clock-history me-2"></i>Prediction History</a></div>
+            <div class="col-md-6"><a class="quick-link" href="{{ url_for('prediction_guide') }}"><i class="bi bi-compass me-2"></i>Prediction Guide</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card app-card h-100">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-3">Recent Manual Predictions</h5>
+          {% if dashboard_stats.recent %}
+            <div class="list-group list-group-flush">
+              {% for row in dashboard_stats.recent %}
+              <div class="list-group-item px-0 bg-transparent d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{ row.Label }}</strong>
+                  <div class="text-muted small">{{ row.SavedAt }}</div>
+                </div>
+                {% if row.Risk_Category == 'High Risk' %}<span class="badge text-bg-danger">High</span>
+                {% elif row.Risk_Category == 'Medium Risk' %}<span class="badge text-bg-warning">Medium</span>
+                {% else %}<span class="badge text-bg-success">Low</span>{% endif %}
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="empty-state compact text-center py-4">
+              <i class="bi bi-inbox text-primary"></i>
+              <p class="text-muted mb-3">Belum ada riwayat prediksi.</p>
+              <a href="{{ url_for('predict') }}" class="btn btn-sm btn-primary rounded-pill">Buat Prediksi</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="card app-card">
+    <div class="card-body p-4">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-4">
+          <h5 class="fw-bold mb-2">Top Influencing Features</h5>
+          <p class="text-muted mb-0">Ringkas supaya tetap informatif tanpa memenuhi dashboard.</p>
+        </div>
+        <div class="col-lg-8">
+          {% for name, score in top_features[:5] %}
+          <div class="mb-3">
+            <div class="d-flex justify-content-between small mb-1"><span class="fw-semibold">{{ name }}</span><span class="text-muted">{{ score }}%</span></div>
+            <div class="progress rounded-pill progress-animated-track"><div class="progress-bar animated-progress-bar" data-progress="{{ score }}"></div></div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

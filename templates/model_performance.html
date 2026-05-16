@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Model Performance · Diabetes Clinical AI{% endblock %}
+{% block content %}
+<div class="page-title mb-4">
+  <span class="badge rounded-pill text-bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 mb-2">Model Performance</span>
+  <h1 class="fw-bold mb-2">Evaluasi Model & Explainability</h1>
+  <p class="text-muted mb-0">Ringkasan performa model, confusion matrix, perbandingan model, threshold analysis, dan feature importance.</p>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-md-4"><div class="stat-card"><span>Accuracy</span><strong class="count-up" data-count="{{ '%.2f'|format((metrics.get('accuracy') or 0) * 100) }}" data-suffix="%">0%</strong><i class="bi bi-bullseye"></i></div></div>
+  <div class="col-md-4"><div class="stat-card success"><span>ROC-AUC</span><strong class="count-up" data-count="{{ '%.2f'|format((metrics.get('roc_auc') or 0) * 100) }}" data-suffix="%">0%</strong><i class="bi bi-graph-up-arrow"></i></div></div>
+  <div class="col-md-4"><div class="stat-card warning"><span>F1-Score</span><strong class="count-up" data-count="{{ '%.2f'|format((metrics.get('f1') or 0) * 100) }}" data-suffix="%">0%</strong><i class="bi bi-sliders"></i></div></div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-7">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-start mb-3 gap-3">
+          <div>
+            <h5 class="fw-bold mb-1">Feature Importance</h5>
+            <p class="text-muted small mb-0">Fitur yang paling besar kontribusinya pada model Gradient Boosting.</p>
+          </div>
+          <span class="badge rounded-pill text-bg-light border">Top {{ top_features|length }}</span>
+        </div>
+        <div class="chart-fixed">
+          <canvas id="featureImportanceChart" height="170"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-5">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Confusion Matrix</h5>
+        <div class="confusion-matrix">
+          <div class="cm-cell cm-label"></div>
+          <div class="cm-cell cm-head">Pred Non-Diabetes</div>
+          <div class="cm-cell cm-head">Pred Diabetes</div>
+          <div class="cm-cell cm-head">Actual Non-Diabetes</div>
+          <div class="cm-cell cm-good"><strong class="count-up" data-count="{{ confusion_matrix.tn }}" data-decimals="0">0</strong><span>True Negative</span></div>
+          <div class="cm-cell cm-warn"><strong class="count-up" data-count="{{ confusion_matrix.fp }}" data-decimals="0">0</strong><span>False Positive</span></div>
+          <div class="cm-cell cm-head">Actual Diabetes</div>
+          <div class="cm-cell cm-warn"><strong class="count-up" data-count="{{ confusion_matrix.fn }}" data-decimals="0">0</strong><span>False Negative</span></div>
+          <div class="cm-cell cm-good"><strong class="count-up" data-count="{{ confusion_matrix.tp }}" data-decimals="0">0</strong><span>True Positive</span></div>
+        </div>
+        <p class="text-muted small mt-3 mb-0">Matrix ini berasal dari test-set notebook training dan dipakai sebagai ringkasan evaluasi akademik.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-7">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Model Comparison</h5>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead><tr><th>Model</th><th>Accuracy</th><th>F1</th><th>ROC-AUC</th><th>Precision</th><th>Recall</th></tr></thead>
+            <tbody>
+              {% for item in model_comparison %}
+              <tr class="{% if item.model == 'Gradient Boosting' %}table-active{% endif %}">
+                <td class="fw-semibold">{{ item.model }}{% if item.model == 'Gradient Boosting' %}<span class="badge text-bg-primary ms-2">Selected</span>{% endif %}</td>
+                <td>{{ '%.2f'|format(item.accuracy * 100) }}%</td>
+                <td>{{ '%.2f'|format(item.f1 * 100) }}%</td>
+                <td>{{ '%.2f'|format(item.roc_auc * 100) }}%</td>
+                <td>{{ '%.2f'|format(item.precision * 100) }}%</td>
+                <td>{{ '%.2f'|format(item.recall * 100) }}%</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-5">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Threshold Sensitivity</h5>
+          <div class="chart-fixed-sm">
+            <canvas id="thresholdChart"></canvas>
+          </div>
+        <p class="text-muted small mt-3 mb-0">Dalam konteks medis, recall bisa diprioritaskan agar false negative lebih kecil.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card app-card">
+  <div class="card-body p-4">
+    <h5 class="fw-bold mb-3">Model Card Summary</h5>
+    <ul class="model-list list-unstyled mb-0">
+      <li><span>Task</span><strong>Binary Classification</strong></li>
+      <li><span>Output</span><strong>Diabetes / Non-Diabetes</strong></li>
+      <li><span>Model</span><strong>{{ model_name }}</strong></li>
+      <li><span>Input</span><strong>8 original + engineered features</strong></li>
+      <li><span>Preprocessing</span><strong>Missing handling, scaling, feature engineering</strong></li>
+      <li><span>Deployment</span><strong>Flask + Bootstrap + Docker</strong></li>
+    </ul>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  window.performanceCharts = {
+    features: {{ feature_chart | tojson }},
+    thresholds: {{ threshold_chart | tojson }}
+  };
+</script>
+{% endblock %}

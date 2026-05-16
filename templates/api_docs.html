@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}API Docs · Diabetes Clinical AI{% endblock %}
+{% block content %}
+<div class="page-title mb-4">
+  <span class="badge rounded-pill text-bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 mb-2">API Documentation</span>
+  <h1 class="fw-bold mb-2">Prediction API Endpoint</h1>
+  <p class="text-muted mb-0">Gunakan endpoint ini untuk integrasi aplikasi lain ke model prediksi diabetes.</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-5">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Endpoint</h5>
+        <div class="api-method mb-3"><span>POST</span><code>/api/predict</code></div>
+        <p class="text-muted">Kirim JSON berisi 8 fitur original. Response berupa prediksi, probabilitas, risk category, risk factors, dan interpretasi.</p>
+        <h6 class="fw-bold mt-4">Required Fields</h6>
+        <div class="d-flex flex-wrap gap-2">
+          {% for key in fields.keys() %}<span class="badge rounded-pill text-bg-light border px-3 py-2">{{ key }}</span>{% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-7">
+    <div class="card app-card mb-4">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Example Request</h5>
+<pre class="code-block"><code>curl -X POST http://localhost:5000/api/predict \
+  -H "Content-Type: application/json" \
+  -d '{{ sample | tojson }}'</code></pre>
+      </div>
+    </div>
+    <div class="card app-card">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Example Response</h5>
+<pre class="code-block"><code>{
+  "ok": true,
+  "prediction": "Diabetes",
+  "probability_diabetes": 0.93,
+  "probability_percent": 93.0,
+  "risk_category": "High Risk",
+  "risk_factors": ["Glucose", "BMI", "Age"],
+  "interpretation": "Model memberi risiko tinggi..."
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

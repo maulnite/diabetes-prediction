@@ -1,0 +1,2 @@
+SavedAt,Pregnancies,Glucose,BloodPressure,SkinThickness,Insulin,BMI,DiabetesPedigreeFunction,Age,Prediction,Label,Probability_Diabetes,Probability_Percent,Risk_Category,Risk_Factors,Interpretation
+2026-05-16 09:55:15,0.0,120.0,110.0,20.0,80.0,25.2,0.0,22.0,0,Non-Diabetes,0.0174,1.74,Low Risk,BloodPressure,"Model memberi risiko rendah, tetapi ada faktor yang tetap perlu dicek: BloodPressure."

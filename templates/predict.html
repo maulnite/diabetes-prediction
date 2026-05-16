@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Manual Prediction · Diabetes Clinical AI{% endblock %}
+{% block content %}
+<div class="page-title mb-4">
+  <span class="badge rounded-pill text-bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 mb-2">Manual Prediction</span>
+  <h1 class="fw-bold mb-2">Input Data Pasien</h1>
+  <p class="text-muted mb-0">Form dibagi seperti data medis: basic data, clinical measurement, dan additional medical data.</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-12">
+    <div class="card app-card">
+      <div class="card-body p-4">
+        <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-center gap-3">
+          <div>
+            <h5 class="fw-bold mb-1"><i class="bi bi-lightning-charge text-primary me-2"></i>Quick Sample untuk Demo</h5>
+            <p class="text-muted small mb-0">Klik salah satu sample untuk mengisi form otomatis saat presentasi.</p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            {% for key, sample in samples.items() %}
+            <button type="button" class="btn btn-outline-primary rounded-pill sample-btn" data-sample-key="{{ key }}" title="{{ sample.description }}">{{ sample.label }}</button>
+            {% endfor %}
+            <a href="{{ url_for('prediction_guide') }}" class="btn btn-light rounded-pill border"><i class="bi bi-compass me-2"></i>Guide</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-8">
+    <form method="post" action="{{ url_for('predict') }}" class="app-form" id="manualPredictionForm">
+      {% for group in feature_groups %}
+      <div class="card app-card mb-4">
+        <div class="card-body p-4">
+          <div class="section-heading mb-4">
+            <div class="icon-circle bg-primary-subtle text-primary"><i class="bi {{ group.icon }}"></i></div>
+            <div>
+              <h5 class="fw-bold mb-1">{{ group.title }}</h5>
+              <p class="text-muted small mb-0">{{ group.description }}</p>
+            </div>
+          </div>
+          <div class="row g-4">
+            {% for key in group.features %}
+              {% set meta = fields[key] %}
+              <div class="col-md-6 {% if group.features|length == 3 and loop.last %}col-lg-12{% endif %}">
+                <label for="{{ key }}" class="form-label fw-semibold d-flex align-items-center gap-2">
+                  <span>{{ meta.label }}</span>
+                  <i class="bi bi-info-circle text-primary small" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ meta.help }}. Rentang valid: {{ meta.min }} - {{ meta.max }} {{ meta.unit }}."></i>
+                </label>
+                <div class="input-group input-group-lg">
+                  <input type="number" min="{{ meta.min }}" max="{{ meta.max }}" step="{{ meta.step }}" class="form-control rounded-start-3" id="{{ key }}" name="{{ key }}" placeholder="{{ meta.placeholder }}" value="{{ values.get(key, '') }}" required>
+                  <span class="input-group-text rounded-end-3">{{ meta.unit }}</span>
+                </div>
+                <div class="form-text">{{ meta.help }} · valid: {{ meta.min }} - {{ meta.max }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+      <div class="d-flex flex-column flex-sm-row gap-3">
+        <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4 submit-btn">
+          <span class="btn-normal"><i class="bi bi-search-heart me-2"></i>Prediksi Sekarang</span>
+          <span class="btn-loading d-none"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Menganalisis...</span>
+        </button>
+        <button type="reset" class="btn btn-outline-secondary btn-lg rounded-pill px-4"><i class="bi bi-arrow-counterclockwise me-2"></i>Reset</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="col-xl-4">
+    <div class="sticky-side">
+      <div class="card app-card mb-4">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-3"><i class="bi bi-shield-check text-primary me-2"></i>Validation Rules</h5>
+          <div class="d-grid gap-2">
+            <div class="rule-pill"><strong>Zero as Missing</strong><span>Glucose, BP, Skin, Insulin, BMI</span></div>
+            <div class="rule-pill"><strong>Auto Engineering</strong><span>24 model features</span></div>
+            <div class="rule-pill"><strong>Risk Output</strong><span>Low / Medium / High</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card app-card mb-4">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-3"><i class="bi bi-rulers text-primary me-2"></i>Normal Range Reference</h5>
+          <div class="reference-mini-list">
+            {% for item in reference_table %}
+              {% if loop.index <= 4 %}
+              <div class="reference-mini-item">
+                <strong>{{ item.feature }}</strong>
+                <span>{{ item.reference }}</span>
+              </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <a href="{{ url_for('prediction_guide') }}#reference-range" class="btn btn-sm btn-outline-primary rounded-pill mt-3">Lihat lengkap</a>
+        </div>
+      </div>
+
+      <div class="card app-card">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-3"><i class="bi bi-info-circle text-primary me-2"></i>Disclaimer</h5>
+          <p class="text-muted mb-0">Aplikasi ini adalah alat bantu pembelajaran machine learning. Hasil prediksi bukan diagnosis medis resmi.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.samplePatients = {{ samples | tojson }};
+</script>
+{% endblock %}

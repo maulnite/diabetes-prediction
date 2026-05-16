@@ -1,0 +1,12 @@
+services:
+  diabetes-web:
+    build: .
+    container_name: diabetes-web
+    ports:
+      - "5000:5000"
+    environment:
+      - SECRET_KEY=change-this-secret-key
+    volumes:
+      - ./data/predictions:/app/data/predictions
+      - ./data/history:/app/data/history
+    restart: unless-stopped

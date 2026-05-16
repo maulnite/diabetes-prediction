@@ -1,0 +1,2 @@
+SavedAt,Pregnancies,Glucose,BloodPressure,SkinThickness,Insulin,BMI,DiabetesPedigreeFunction,Age,Prediction,Label,Probability_Diabetes,Probability_Percent,Risk_Category,Risk_Factors,Interpretation
+2026-05-16 09:53:22,3.0,138.0,82.0,30.0,135.0,31.2,0.62,43.0,1,Diabetes,0.6551,65.51,Medium Risk,"BMI, DiabetesPedigreeFunction, BloodPressure","Model memberi risiko sedang. Beberapa faktor yang perlu diperhatikan adalah BMI, DiabetesPedigreeFunction, BloodPressure."

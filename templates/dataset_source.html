@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Dataset Source · Diabetes Clinical AI{% endblock %}
+{% block content %}
+<div class="page-title mb-4 page-title-clean">
+  <span class="eyebrow-pill mb-2">Dataset Source</span>
+  <h1 class="fw-bold mb-2">Pima Indians Diabetes Database</h1>
+  <p class="text-muted mb-0">Dataset utama yang dipakai untuk training model diabetes pada aplikasi ini.</p>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card stat-card-clean compact-stat">
+      <span>Total Records</span>
+      <strong>{{ pima_summary.rows }}</strong>
+      <small>baris data pada <code>diabetes.csv</code></small>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card stat-card-clean compact-stat">
+      <span>Input Features</span>
+      <strong>{{ pima_summary.feature_count }}</strong>
+      <small>fitur medis untuk prediksi</small>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card stat-card-clean compact-stat">
+      <span>Target Column</span>
+      <strong class="fs-3">{{ pima_summary.target_column }}</strong>
+      <small>0 = non-diabetes, 1 = diabetes</small>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card stat-card-clean compact-stat">
+      <span>Class Split</span>
+      <strong class="fs-4">{{ pima_summary.non_diabetes }} / {{ pima_summary.diabetes }}</strong>
+      <small>non-diabetes / diabetes</small>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-7">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-journal-medical text-primary me-2"></i>Dataset Overview</h5>
+        <p class="text-muted mb-3">Model dilatih menggunakan format <strong>Pima Indians Diabetes Database</strong>, yang terdiri dari 8 fitur input medis dan 1 target label bernama <code>Outcome</code>.</p>
+        <div class="source-box rounded-4 p-3 mb-3 source-box-clean">
+          <div class="small text-muted mb-1">Dataset URL</div>
+          <a href="{{ pima_summary.source_url }}" target="_blank" rel="noopener" class="fw-semibold text-decoration-none">{{ pima_summary.source_url }}</a>
+        </div>
+        <div class="soft-note"><i class="bi bi-info-circle me-2"></i>Untuk batch prediction, kolom <code>Outcome</code> boleh tidak ada karena aplikasi hanya membutuhkan 8 fitur input.</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-columns-gap text-primary me-2"></i>Required CSV Format</h5>
+        <p class="text-muted small">CSV prediksi harus memiliki kolom berikut:</p>
+        <div class="d-flex flex-wrap gap-2">
+          {% for col in original_features %}
+          <span class="badge feature-badge feature-badge-clean"><i class="bi bi-check2-circle me-1"></i>{{ col }}</span>
+          {% endfor %}
+        </div>
+        <hr>
+        <p class="text-muted small mb-0"><code>Outcome</code> hanya dipakai saat training/evaluasi, bukan untuk prediksi baru.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card app-card mb-4">
+  <div class="card-body p-4">
+    <h5 class="fw-bold mb-3"><i class="bi bi-table text-primary me-2"></i>Pima Feature Description</h5>
+    <div class="table-responsive">
+      <table class="table align-middle clean-table">
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Role</th>
+            <th>Description</th>
+            <th>Preprocessing Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in mapping %}
+          <tr>
+            <td class="fw-semibold"><code>{{ row.dataset_column }}</code></td>
+            <td>
+              {% if row.role == 'Target label' %}
+                <span class="badge text-bg-warning">{{ row.role }}</span>
+              {% else %}
+                <span class="badge text-bg-success">{{ row.role }}</span>
+              {% endif %}
+            </td>
+            <td class="text-muted small">{{ row.description }}</td>
+            <td class="text-muted small">{{ row.preprocessing }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card app-card">
+  <div class="card-body p-4">
+    <h5 class="fw-bold mb-3"><i class="bi bi-clipboard-check text-primary me-2"></i>Catatan untuk Laporan</h5>
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="soft-note h-100"><strong>Dataset training:</strong> Pima Indians Diabetes Database dengan fitur Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, dan Age.</div>
+      </div>
+      <div class="col-lg-6">
+        <div class="soft-note h-100"><strong>Preprocessing:</strong> nilai <code>0</code> pada beberapa kolom medis diperlakukan sebagai missing value sebelum prediksi.</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

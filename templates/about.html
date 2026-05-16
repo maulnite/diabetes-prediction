@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}About Model · Diabetes Clinical AI{% endblock %}
+{% block content %}
+<div class="page-title mb-4">
+  <span class="badge rounded-pill text-bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 mb-2">About Model</span>
+  <h1 class="fw-bold mb-2">Model Card dan Alur Prediksi</h1>
+  <p class="text-muted mb-0">Detail model, preprocessing, feature engineering, validasi input, dan batasan aplikasi.</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-4">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Model Summary</h5>
+        <ul class="model-list list-unstyled mb-0">
+          <li><span>Model</span><strong>{{ model_name }}</strong></li>
+          <li><span>Accuracy</span><strong>{{ format_percent(metrics.get('accuracy')) }}</strong></li>
+          <li><span>ROC-AUC</span><strong>{{ format_percent(metrics.get('roc_auc')) }}</strong></li>
+          <li><span>F1-Score</span><strong>{{ format_percent(metrics.get('f1')) }}</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-8">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Alur Prediksi</h5>
+        <div class="timeline">
+          <div><strong>1. Input</strong><p>User mengisi 8 fitur medis utama atau upload CSV.</p></div>
+          <div><strong>2. Validation</strong><p>Sistem mengecek tipe data, nilai negatif, nilai kosong, dan rentang input.</p></div>
+          <div><strong>3. Cleaning</strong><p>Nilai 0 pada kolom medis tertentu dianggap missing value lalu diimputasi.</p></div>
+          <div><strong>4. Feature Engineering</strong><p>Sistem membuat fitur interaksi seperti Glucose_BMI, BMI_Age, Risk_Score, dan fitur lainnya.</p></div>
+          <div><strong>5. Scaling + Prediction</strong><p>Data diskalakan dengan scaler dari bundle, lalu diprediksi memakai model.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-6">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Original Input Features</h5>
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          {% for col in original_features %}<span class="badge rounded-pill text-bg-light border px-3 py-2">{{ col }}</span>{% endfor %}
+        </div>
+        <h6 class="fw-bold mb-2">Zero-as-Missing Columns</h6>
+        <div class="d-flex flex-wrap gap-2">
+          {% for col in zero_cols %}<span class="badge rounded-pill text-bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-2">{{ col }}</span>{% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-6">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Rule Risk Factor Highlight</h5>
+        <div class="d-grid gap-2">
+          {% for feature, threshold, title, desc in risk_rules %}
+          <div class="rule-pill"><strong>{{ title }}</strong><span>{{ feature }} &gt; {{ threshold }}</span></div>
+          {% endfor %}
+        </div>
+        <p class="text-muted small mt-3 mb-0">Rule ini hanya interpretasi tambahan, bukan pengganti keputusan model.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-7">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Rentang Validasi Input</h5>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead><tr><th>Feature</th><th>Rentang</th><th>Unit</th></tr></thead>
+            <tbody>
+            {% for key, meta in fields.items() %}
+              <tr><td class="fw-semibold">{{ key }}</td><td>{{ meta.min }} - {{ meta.max }}</td><td>{{ meta.unit }}</td></tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-5">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Limitations</h5>
+        <div class="alert alert-info rounded-4">Aplikasi ini dibuat untuk pembelajaran dan demonstrasi model machine learning.</div>
+        <div class="alert alert-warning rounded-4 mb-0">Hasil prediksi bukan diagnosis medis resmi. Dataset training yang digunakan adalah Pima Indians Diabetes Database, sehingga input CSV sebaiknya mengikuti format fitur Pima.</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Batch Result · Diabetes Clinical AI{% endblock %}
+{% block content %}
+<div class="page-title mb-4">
+  <span class="badge rounded-pill text-bg-success px-3 py-2 mb-2">Batch Prediction Complete</span>
+  <h1 class="fw-bold mb-2">Hasil Prediksi CSV</h1>
+  <p class="text-muted mb-0">File: {{ filename }}</p>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-sm-6 col-xl-3"><div class="stat-card"><span>Total Records</span><strong>{{ total_rows }}</strong><i class="bi bi-table"></i></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="stat-card danger"><span>Diabetes</span><strong>{{ diabetes_count }}</strong><i class="bi bi-heart-pulse"></i></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="stat-card success"><span>Non-Diabetes</span><strong>{{ non_diabetes_count }}</strong><i class="bi bi-check2-circle"></i></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="stat-card warning"><span>Quality Score</span><strong>{{ quality_report.quality_score }}%</strong><i class="bi bi-database-check"></i></div></div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-7">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+          <div>
+            <h5 class="fw-bold mb-1">Risk Distribution</h5>
+            <p class="text-muted small mb-0">Distribusi Low, Medium, dan High Risk dari file CSV.</p>
+          </div>
+          <a href="{{ url_for('download', file_id=file_id) }}" class="btn btn-primary rounded-pill px-4"><i class="bi bi-download me-2"></i>Download CSV</a>
+        </div>
+        <canvas id="riskChart" height="135"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-5">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Prediction Distribution</h5>
+        <canvas id="predictionChart" height="160"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card app-card mb-4">
+  <div class="card-body p-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+      <div>
+        <h5 class="fw-bold mb-1"><i class="bi bi-database-check text-primary me-2"></i>Data Quality Report</h5>
+        <p class="text-muted small mb-0">Laporan missing value, nilai kosong, outlier, dan penyesuaian otomatis pada batch CSV.</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <span class="badge text-bg-light border px-3 py-2">Rows with issue: {{ quality_report.rows_with_issue }}</span>
+        <span class="badge text-bg-warning px-3 py-2">Missing: {{ quality_report.total_missing }}</span>
+        <span class="badge text-bg-info px-3 py-2">Clipped: {{ quality_report.total_out_of_range }}</span>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead><tr><th>Feature</th><th>Missing</th><th>Zero as Missing</th><th>Out Low</th><th>Out High</th><th>Action</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for item in quality_report.columns %}
+          <tr>
+            <td class="fw-semibold">{{ item.feature }}</td>
+            <td>{{ item.missing }}</td>
+            <td>{{ item.zero_as_missing }}</td>
+            <td>{{ item.out_low }}</td>
+            <td>{{ item.out_high }}</td>
+            <td>{% if item.imputed or item.clipped %}Imputed: {{ item.imputed }}, clipped: {{ item.clipped }}{% else %}-{% endif %}</td>
+            <td><span class="badge text-bg-{{ item.status_class }}">{{ item.status }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card app-card">
+  <div class="card-body p-4">
+    <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-center gap-3 mb-3">
+      <div>
+        <h5 class="fw-bold mb-1">Preview Hasil</h5>
+        <p class="text-muted small mb-0">Menampilkan {{ shown_rows }} baris pertama. Gunakan search/filter untuk mengecek kategori tertentu.</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <div class="input-group input-group-sm batch-search-control">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="search" class="form-control" id="batchSearch" placeholder="Search preview...">
+        </div>
+        <select class="form-select form-select-sm batch-filter-control" id="batchRiskFilter" aria-label="Filter batch result">
+          <option value="all">Show All</option>
+          <option value="Low Risk">Low Risk</option>
+          <option value="Medium Risk">Medium Risk</option>
+          <option value="High Risk">High Risk</option>
+          <option value="Diabetes">Diabetes Only</option>
+          <option value="Non-Diabetes">Non-Diabetes Only</option>
+        </select>
+        <a href="{{ url_for('download', file_id=file_id) }}" class="btn btn-primary rounded-pill px-4"><i class="bi bi-download me-2"></i>Download CSV</a>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle" id="batchPreviewTable">
+        <thead><tr>{% for col in preview_columns %}<th>{{ col }}</th>{% endfor %}</tr></thead>
+        <tbody>
+          {% for row in preview_rows %}
+          <tr class="batch-result-row" data-risk="{{ row.get('Risk_Category', '') }}" data-label="{{ row.get('Label', '') }}" data-search="{{ row.values() | join(' ') | lower }}">
+            {% for col in preview_columns %}
+            <td>
+              {% if col == 'Risk_Category' %}
+                {% if row[col] == 'High Risk' %}<span class="badge text-bg-danger">{{ row[col] }}</span>
+                {% elif row[col] == 'Medium Risk' %}<span class="badge text-bg-warning">{{ row[col] }}</span>
+                {% else %}<span class="badge text-bg-success">{{ row[col] }}</span>{% endif %}
+              {% elif col == 'Label' %}
+                {% if row[col] == 'Diabetes' %}<span class="badge text-bg-danger">{{ row[col] }}</span>
+                {% else %}<span class="badge text-bg-success">{{ row[col] }}</span>{% endif %}
+              {% else %}{{ row[col] }}{% endif %}
+            </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+          <tr id="batchNoRows" class="d-none"><td colspan="{{ preview_columns|length }}" class="text-center text-muted py-4">Tidak ada baris yang cocok dengan filter.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  window.batchCharts = {
+    risk: {{ chart_data | tojson }},
+    prediction: {{ prediction_chart_data | tojson }}
+  };
+</script>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Prediction Result · Diabetes Clinical AI{% endblock %}
+{% block content %}
+<div class="page-title mb-4">
+  <span class="badge rounded-pill text-bg-{{ badge_class }} px-3 py-2 mb-2">Prediction Result</span>
+  <h1 class="fw-bold mb-2">Hasil Analisis Risiko</h1>
+  <p class="text-muted mb-0">Hasil prediksi dilengkapi risk factor, comparison table, dan export report.</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-4">
+    <div class="card app-card h-100">
+      <div class="card-body p-4 text-center">
+        <div class="risk-circle mx-auto mb-4 risk-{{ badge_class }}" style="--value: {{ probability_percent }};">
+          <span>{{ probability_percent }}%</span>
+        </div>
+        <h3 class="fw-bold mb-2">{{ result.Label }}</h3>
+        <p class="text-muted mb-3">Probability Diabetes</p>
+        <div class="badge text-bg-{{ badge_class }} rounded-pill px-3 py-2 mb-3">{{ category }}</div>
+        <p class="mb-4">{{ explanation }}</p>
+        <div class="progress rounded-pill mb-4" role="progressbar" aria-valuenow="{{ probability_percent }}" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar bg-{{ badge_class }}" style="width: {{ probability_percent }}%"></div>
+        </div>
+        <div class="d-grid gap-2">
+          <a href="{{ url_for('download', file_id=file_id) }}" class="btn btn-outline-primary rounded-pill"><i class="bi bi-download me-2"></i>Download CSV</a>
+          <a href="{{ url_for('report_pdf', file_id=file_id) }}" class="btn btn-primary rounded-pill"><i class="bi bi-filetype-pdf me-2"></i>Download PDF Report</a>
+          <a href="{{ url_for('history') }}" class="btn btn-light border rounded-pill"><i class="bi bi-clock-history me-2"></i>Lihat History</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-8">
+    <div class="card app-card mb-4">
+      <div class="card-body p-4">
+        <h4 class="fw-bold mb-3"><i class="bi bi-chat-left-heart text-primary me-2"></i>Interpretasi Singkat</h4>
+        <div class="alert alert-{{ badge_class }} rounded-4 mb-0">{{ interpretation }}</div>
+      </div>
+    </div>
+
+    <div class="card app-card mb-4">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-exclamation-circle text-danger me-2"></i>Risk Factors Detected</h5>
+        {% if risk_factors %}
+          <div class="row g-3">
+            {% for item in risk_factors %}
+            <div class="col-md-6">
+              <div class="factor-card factor-risk h-100">
+                <div class="d-flex align-items-start gap-2">
+                  <i class="bi bi-exclamation-circle-fill text-danger"></i>
+                  <div>
+                    <h6 class="fw-bold mb-1">{{ item.title }}</h6>
+                    <p class="text-muted small mb-2">{{ item.description }}</p>
+                    <span class="badge text-bg-light border">{{ item.feature }}: {{ item.value }} &gt; {{ item.threshold }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="alert alert-success rounded-4 mb-0"><i class="bi bi-check-circle me-2"></i>Tidak ada faktor utama yang melewati threshold sederhana aplikasi.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-7">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-clipboard-data text-primary me-2"></i>Input Summary</h5>
+        <div class="row g-3">
+          {% for key, value in input_values.items() %}
+          <div class="col-sm-6">
+            <div class="input-summary">
+              <span>{{ key }}</span>
+              <strong>{{ value }}</strong>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-5">
+    <div class="card app-card h-100">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-sliders text-primary me-2"></i>Reference Comparison</h5>
+        <div class="d-grid gap-2">
+          {% for item in comparison %}
+          <div class="comparison-row">
+            <div>
+              <strong>{{ item.label }}</strong>
+              <div class="text-muted small">{{ item.value }} {{ item.unit }}</div>
+            </div>
+            <span class="badge text-bg-{{ item.status_class }}">{{ item.status }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        <p class="text-muted small mt-3 mb-0">Comparison ini memakai threshold sederhana aplikasi, bukan diagnosis medis.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card app-card">
+      <div class="card-body p-4">
+        <div class="row g-4 align-items-center">
+          <div class="col-lg-7">
+            <h5 class="fw-bold mb-2">Catatan Pembacaan Hasil</h5>
+            <p class="text-muted mb-0">Model tetap menggunakan seluruh fitur dan engineered features. Risk factor dan comparison di atas hanya bantuan interpretasi agar hasil lebih mudah dipahami.</p>
+          </div>
+          <div class="col-lg-5">
+            <div class="alert alert-info rounded-4 mb-0"><i class="bi bi-info-circle me-2"></i>Hasil ini bukan diagnosis medis. Tetap konsultasikan dengan tenaga medis profesional.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 text-center">
+    <a href="{{ url_for('predict') }}" class="btn btn-primary rounded-pill px-4"><i class="bi bi-arrow-repeat me-2"></i>Prediksi Lagi</a>
+  </div>
+</div>
+{% endblock %}

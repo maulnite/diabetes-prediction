@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}History · Diabetes Clinical AI{% endblock %}
+{% block content %}
+<div class="page-title mb-4">
+  <span class="badge rounded-pill text-bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 mb-2">Prediction History</span>
+  <h1 class="fw-bold mb-2">Riwayat Prediksi Manual</h1>
+  <p class="text-muted mb-0">Setiap prediksi manual disimpan supaya bisa dicek lagi, difilter, atau di-download.</p>
+</div>
+
+<div class="card app-card">
+  <div class="card-body p-4">
+    <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-center gap-3 mb-3">
+      <div>
+        <h5 class="fw-bold mb-1">Data History</h5>
+        <p class="text-muted small mb-0">Menampilkan maksimal 100 data terbaru.</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <div class="input-group input-group-sm history-search-control">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="search" class="form-control" id="historySearch" placeholder="Search history..." {% if not records %}disabled{% endif %}>
+        </div>
+        <select class="form-select form-select-sm history-filter-control" id="historyRiskFilter" {% if not records %}disabled{% endif %}>
+          <option value="all">All Risk</option>
+          <option value="Low Risk">Low Risk</option>
+          <option value="Medium Risk">Medium Risk</option>
+          <option value="High Risk">High Risk</option>
+          <option value="Diabetes">Diabetes Only</option>
+          <option value="Non-Diabetes">Non-Diabetes Only</option>
+        </select>
+        <a href="{{ url_for('download_history') }}" class="btn btn-primary rounded-pill px-4 {% if not records %}disabled{% endif %}"><i class="bi bi-download me-2"></i>Download History</a>
+        <form method="post" action="{{ url_for('clear_history') }}" onsubmit="return confirm('Yakin ingin menghapus seluruh history?')">
+          <button type="submit" class="btn btn-outline-danger rounded-pill px-4" {% if not records %}disabled{% endif %}><i class="bi bi-trash me-2"></i>Clear</button>
+        </form>
+      </div>
+    </div>
+
+    {% if records %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle" id="historyTable">
+        <thead><tr>{% for col in columns %}<th>{{ col }}</th>{% endfor %}</tr></thead>
+        <tbody>
+          {% for row in records %}
+          <tr class="history-row" data-risk="{{ row.get('Risk_Category', '') }}" data-label="{{ row.get('Label', '') }}" data-search="{{ row.values() | join(' ') | lower }}">
+            {% for col in columns %}
+            <td>
+              {% if col == 'Risk_Category' %}
+                {% if row[col] == 'High Risk' %}<span class="badge text-bg-danger">{{ row[col] }}</span>
+                {% elif row[col] == 'Medium Risk' %}<span class="badge text-bg-warning">{{ row[col] }}</span>
+                {% else %}<span class="badge text-bg-success">{{ row[col] }}</span>{% endif %}
+              {% elif col == 'Label' %}
+                {% if row[col] == 'Diabetes' %}<span class="badge text-bg-danger">{{ row[col] }}</span>
+                {% else %}<span class="badge text-bg-success">{{ row[col] }}</span>{% endif %}
+              {% else %}{{ row[col] }}{% endif %}
+            </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+          <tr id="historyNoRows" class="d-none"><td colspan="{{ columns|length }}" class="text-center text-muted py-4">Tidak ada history yang cocok dengan filter.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state text-center py-5">
+      <i class="bi bi-clock-history text-primary"></i>
+      <h5 class="fw-bold mt-3">Belum ada history</h5>
+      <p class="text-muted">Lakukan prediksi manual terlebih dahulu, nanti hasilnya akan muncul di sini.</p>
+      <a href="{{ url_for('predict') }}" class="btn btn-primary rounded-pill px-4">Mulai Prediksi</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
